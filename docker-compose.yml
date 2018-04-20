@@ -1,8 +1,27 @@
-version: "2"
+version: "3"
 services:
     app:
         image: golang:1.10
+        ports:
+            - 8080:8080
         volumes: 
             - .:/go/src/github.com/emptyset/simple-chat
         working_dir: /go/src/github.com/emptyset/simple-chat/cmd/server
         command: go run main.go
+        depends_on: 
+            - database
+        networks:
+            - internal
+
+    database:
+        image: mariadb
+        environment:
+            - MYSQL_ROOT_PASSWORD=password
+        volumes:
+            - ./data:/var/lib/mysql
+        networks:
+            - internal
+
+networks:
+    internal:
+        driver: "bridge"
