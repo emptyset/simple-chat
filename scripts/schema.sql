@@ -14,6 +14,6 @@ CREATE TABLE message (
 	metadata TEXT,
 
 	PRIMARY KEY (id),
-	FOREIGN KEY sender_id REFERENCES user(id),
-	FOREIGN KEY recipient_id REFERENCES user(id)
+	FOREIGN KEY (sender_id) REFERENCES user(id),
+	FOREIGN KEY (recipient_id) REFERENCES user(id)
 );
