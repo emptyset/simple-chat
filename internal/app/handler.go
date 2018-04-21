@@ -7,11 +7,11 @@ import (
 )
 
 type Handler struct {
-	database sql.DB
+	database *sql.DB
 	endpoints map[string]func(http.ResponseWriter, *http.Request)
 }
 
-func NewHandler(database sql.DB) (*Handler, error) {
+func NewHandler(database *sql.DB) (*Handler, error) {
 	handler := &Handler{
 		database: database,
 		endpoints: make(map[string]func(http.ResponseWriter, *http.Request)),

@@ -14,10 +14,14 @@ services:
             - internal
 
     database:
-        image: mariadb
+        image: mysql 
         environment:
-            - MYSQL_ROOT_PASSWORD=password
+            MYSQL_DATABASE: "chat"
+            MYSQL_USER: "test"
+            MYSQL_PASSWORD: "test"
+            MYSQL_ROOT_PASSWORD: "password"
         volumes:
+            - ./scripts/schema.sql:/docker-entrypoint-initdb.d/schema.sql
             - ./data:/var/lib/mysql
         networks:
             - internal
