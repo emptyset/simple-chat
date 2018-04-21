@@ -2,29 +2,41 @@ package main
 
 import (
 	"database/sql"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"github.com/emptyset/simple-chat/internal/app"
+	"github.com/emptyset/simple-chat/internal/models"
+	"github.com/emptyset/simple-chat/internal/storage"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
 	// TODO: configure from environment variables
+	log.SetLevel(log.DebugLevel)
+
 	// TODO: build connection string from environment variables
+	log.Debug("opening mysql database")
 	database, err := sql.Open("mysql", "root:password@tcp(database:3306)/database")
 	if err != nil {
-		log.Fatal("unable to connect to database", err)
+		log.Fatal("unable to connect to database: %s", err)
 	}
 
-	handler, err := app.NewHandler(database)
+	log.Debug("creating sql data store")
+	store := storage.NewSqlDataStore(database)
+	model := models.New(store)
+	handler, err := app.NewHandler(model)
+	if err != nil {
+		log.Fatal("unable to instantiate handler: %s", err)
+	}
 
 	server := http.Server{
 		Addr: ":8080",
 		Handler: handler,
 	}
 
+	log.Debug("starting server")
 	err = server.ListenAndServe()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("unable to start server: %s", err)
 	}
 }
