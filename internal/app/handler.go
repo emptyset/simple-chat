@@ -143,6 +143,8 @@ func (h *Handler) getMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: optional parameters
+
 	count, err := strconv.Atoi(query.Get("c"))
 	if err != nil {
 		log.Errorf("error when converting count from request: %s", err)
