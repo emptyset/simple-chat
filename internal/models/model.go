@@ -52,12 +52,14 @@ func (m *Model) SignupUser(username string, password string) (*User, error) {
 	log.Debug("generating hash for password")
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
+		log.Errorf("error when generating hash for password: %s", err)
 		return nil, err
 	}
 
 	log.Debug("creating user in the data store")
 	record, err := m.store.CreateUser(username, hash)
 	if err != nil {
+		log.Errorf("error when creating user in the data store: %s", err)
 		return nil, err
 	}
 
