@@ -14,7 +14,7 @@ services:
             - internal
 
     database:
-        image: mysql 
+        image: mysql:5.7
         environment:
             MYSQL_DATABASE: "chat"
             MYSQL_ROOT_PASSWORD: "password"

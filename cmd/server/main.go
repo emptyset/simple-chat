@@ -31,6 +31,8 @@ func main() {
 		err = database.Ping()
 		if err != nil {
 			log.Errorf("unable to ping database: %s", err)
+		} else {
+			break
 		}
 
 		retries++

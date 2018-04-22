@@ -46,7 +46,7 @@ func (s *SqlDataStore) CreateUser(username string, hash []byte) (Record, error) 
 		return record, err
 	}
 
-	record = []byte(fmt.Sprintf(`{"id": "%d", "username": "%s"}`, id, username))
+	record = []byte(fmt.Sprintf(`{"id": %d, "username": "%s"}`, id, username))
 
 	log.WithFields(log.Fields{
 		"record": string(record),
@@ -80,7 +80,7 @@ func (s *SqlDataStore) CreateMessage(senderId int, recipientId int, content stri
 		return record, err
 	}
 
-	record = []byte(fmt.Sprintf(`{"id": "%d"}`, id))
+	record = []byte(fmt.Sprintf(`{"id": %d}`, id))
 
 	log.WithFields(log.Fields{
 		"record": string(record),
@@ -112,7 +112,7 @@ func (s *SqlDataStore) ReadMessages(senderId int, recipientId int, count int, of
 
 		// TODO: verify we are parsing timestamp and metadata correctly here
 
-		record := []byte(fmt.Sprintf(`{"id": "%d", "timestamp": "%s", "sender_id": "%d", "recipient_id": "%d", "content": "%s", "metadata": "%s"}`, id, rawTimestamp, senderId, recipientId, content, rawMetadata))
+		record := []byte(fmt.Sprintf(`{"id": %d, "timestamp": "%s", "sender_id": %d, "recipient_id": %d, "content": "%s", "metadata": "%s"}`, id, rawTimestamp, senderId, recipientId, content, rawMetadata))
 
 		log.WithFields(log.Fields{
 			"record": string(record),
