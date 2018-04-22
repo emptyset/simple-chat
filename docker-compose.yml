@@ -6,8 +6,8 @@ services:
             - 8080:8080
         volumes: 
             - .:/go/src/github.com/emptyset/simple-chat
-        working_dir: /go/src/github.com/emptyset/simple-chat/cmd/server
-        command: go run main.go
+        working_dir: /go/src/github.com/emptyset/simple-chat
+        command: go run ./cmd/server/main.go
         depends_on: 
             - database
         networks:
