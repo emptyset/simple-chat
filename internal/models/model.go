@@ -5,9 +5,30 @@ import (
 	"fmt"
 	"encoding/json"
 	log "github.com/sirupsen/logrus"
+	"strconv"
+	"strings"
 	"time"
 	"github.com/emptyset/simple-chat/internal/storage"
 )
+
+type UnixTime struct {
+	time.Time
+}
+
+func (t *UnixTime) UnmarshalJSON(b []byte) error {
+	s := strings.Trim(string(b), "\"")
+	i, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	t.Time = time.Unix(i, 0)
+	return nil
+}
+
+func (t *UnixTime) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf("\"%d\"", t.Time.UTC().Unix())), nil
+}
 
 type User struct {
 	Id int `json:"id"`
@@ -16,11 +37,12 @@ type User struct {
 
 type Message struct {
 	Id int `json:"id"`
-	Timestamp time.Time `json:"timestamp"`
+	Timestamp UnixTime `json:"timestamp"`
 	SenderId int `json:"sender_id"`
 	RecipientId int `json:"recipient_id"`
 	Content string `json:"content"`
-	Metadata map[string]string `json:"metadata"`
+	MediaType string `json:"media_type"`
+	Metadata interface{} `json:"metadata"`
 }
 
 // media types for metadata _type field
@@ -74,7 +96,7 @@ func transcribeUser(record storage.Record) (*User, error) {
 }
 
 func (m *Model) GetMessages(senderId int, recipientId int, count int, offset int) ([]Message, error) {
-	messages := make([]Message, count, count)
+	var messages []Message
 
 	log.Debug("reading messages from the data store")
 	records, err := m.store.ReadMessages(senderId, recipientId, count, offset)
@@ -104,26 +126,26 @@ func (m *Model) SendMessage(senderId int, recipientId int, content string, media
 	}
 
 	log.Debug("creating message in the data store")
-	_, err = m.store.CreateMessage(senderId, recipientId, content, metadata)
+	_, err = m.store.CreateMessage(senderId, recipientId, content, mediaType, metadata)
 	return err
 }
 
 func transcribeMessage(record storage.Record) (*Message, error) {
-	message := &Message{}
+	message := &Message{
+		Metadata: &json.RawMessage{},
+	}
 	err := json.Unmarshal(record, message)
 	return message, err
 }
 
 func getMetadata(content string, mediaType string) (map[string]string, error) {
-	metadata := make(map[string]string)
+	var metadata map[string]string
 	switch mediaType {
 	case Text:
-		metadata["_type"] = Text
+		break
 	case Image:
-		metadata["_type"] = Image
 		getImageMetadata(content, metadata)
 	case Video:
-		metadata["_type"] = Video
 		getVideoMetadata(content, metadata)
 	default:
 		return metadata, fmt.Errorf("unknown content media type: %s", mediaType)

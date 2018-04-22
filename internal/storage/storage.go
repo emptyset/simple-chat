@@ -12,7 +12,7 @@ type Record []byte
 
 type DataStore interface {
 	CreateUser(username string, hash []byte) (Record, error)
-	CreateMessage(senderId int, recipientId int, content string, metadata map[string]string) (Record, error)
+	CreateMessage(senderId int, recipientId int, content string, mediaType string, metadata map[string]string) (Record, error)
 	ReadMessages(senderId int, recipientId int, count int, offset int) ([]Record, error)
 }
 
@@ -55,11 +55,11 @@ func (s *SqlDataStore) CreateUser(username string, hash []byte) (Record, error) 
 	return record, nil
 }
 
-func (s *SqlDataStore) CreateMessage(senderId int, recipientId int, content string, metadata map[string]string) (Record, error) {
+func (s *SqlDataStore) CreateMessage(senderId int, recipientId int, content string, mediaType string, metadata map[string]string) (Record, error) {
 	record := []byte("")
 
 	log.Debug("preparing insert message statement")
-	statement, err := s.database.Prepare("INSERT INTO message (timestamp, sender_id, recipient_id, content, metadata) VALUES (?, ?, ?, ?, ?)")
+	statement, err := s.database.Prepare("INSERT INTO message (timestamp, sender_id, recipient_id, content, media_type, metadata) VALUES (?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return record, err
 	}
@@ -70,7 +70,7 @@ func (s *SqlDataStore) CreateMessage(senderId int, recipientId int, content stri
 	}
 
 	log.Debug("executing statement")
-	response, err := statement.Exec(time.Now().UTC().Unix(), senderId, recipientId, content, encodedMetadata)
+	response, err := statement.Exec(time.Now().UTC().Unix(), senderId, recipientId, content, mediaType, encodedMetadata)
 	if err != nil {
 		return record, err
 	}
@@ -91,7 +91,7 @@ func (s *SqlDataStore) CreateMessage(senderId int, recipientId int, content stri
 
 func (s *SqlDataStore) ReadMessages(senderId int, recipientId int, count int, offset int) ([]Record, error) {
 	var records []Record
-	rows, err := s.database.Query("SELECT id, timestamp, content, metadata FROM messages WHERE sender_id = ? AND recipient_id = ? ORDER BY timestamp DESC LIMIT ? OFFSET ?", senderId, recipientId, count, offset)
+	rows, err := s.database.Query("SELECT id, timestamp, content, media_type, metadata FROM messages WHERE sender_id = ? AND recipient_id = ? ORDER BY timestamp DESC LIMIT ? OFFSET ?", senderId, recipientId, count, offset)
 	if err != nil {
 		return records, err
 	}
@@ -101,18 +101,19 @@ func (s *SqlDataStore) ReadMessages(senderId int, recipientId int, count int, of
 		id int
 		rawTimestamp []byte
 		content string
+		mediaType string
 		rawMetadata []byte
 	)
 
 	for rows.Next() {
-		err := rows.Scan(&id, &rawTimestamp, &content, &rawMetadata)
+		err := rows.Scan(&id, &rawTimestamp, &content, &mediaType, &rawMetadata)
 		if err != nil {
 			log.Errorf("unable to scan row into record")
 		}
 
 		// TODO: verify we are parsing timestamp and metadata correctly here
 
-		record := []byte(fmt.Sprintf(`{"id": %d, "timestamp": "%s", "sender_id": %d, "recipient_id": %d, "content": "%s", "metadata": "%s"}`, id, rawTimestamp, senderId, recipientId, content, rawMetadata))
+		record := []byte(fmt.Sprintf(`{"id": %d, "timestamp": "%s", "sender_id": %d, "recipient_id": %d, "content": "%s", "media_type": "%s", "metadata": "%s"}`, id, rawTimestamp, senderId, recipientId, content, mediaType, rawMetadata))
 
 		log.WithFields(log.Fields{
 			"record": string(record),

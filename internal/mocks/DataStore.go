@@ -9,13 +9,13 @@ type DataStore struct {
 	mock.Mock
 }
 
-// CreateMessage provides a mock function with given fields: senderId, recipientId, content, metadata
-func (_m *DataStore) CreateMessage(senderId int, recipientId int, content string, metadata map[string]string) (storage.Record, error) {
-	ret := _m.Called(senderId, recipientId, content, metadata)
+// CreateMessage provides a mock function with given fields: senderId, recipientId, content, mediaType, metadata
+func (_m *DataStore) CreateMessage(senderId int, recipientId int, content string, mediaType string, metadata map[string]string) (storage.Record, error) {
+	ret := _m.Called(senderId, recipientId, content, mediaType, metadata)
 
 	var r0 storage.Record
-	if rf, ok := ret.Get(0).(func(int, int, string, map[string]string) storage.Record); ok {
-		r0 = rf(senderId, recipientId, content, metadata)
+	if rf, ok := ret.Get(0).(func(int, int, string, string, map[string]string) storage.Record); ok {
+		r0 = rf(senderId, recipientId, content, mediaType, metadata)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(storage.Record)
@@ -23,8 +23,8 @@ func (_m *DataStore) CreateMessage(senderId int, recipientId int, content string
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int, int, string, map[string]string) error); ok {
-		r1 = rf(senderId, recipientId, content, metadata)
+	if rf, ok := ret.Get(1).(func(int, int, string, string, map[string]string) error); ok {
+		r1 = rf(senderId, recipientId, content, mediaType, metadata)
 	} else {
 		r1 = ret.Error(1)
 	}

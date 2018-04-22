@@ -11,6 +11,7 @@ CREATE TABLE message (
 	sender_id INT NOT NULL,
 	recipient_id INT NOT NULL,
 	content TEXT,
+	media_type VARCHAR(255),
 	metadata TEXT,
 
 	PRIMARY KEY (id),
