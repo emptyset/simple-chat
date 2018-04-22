@@ -8,4 +8,9 @@ curl -X POST "localhost:8080/message?s=1&r=1&t=text" -d "my life is made of patt
 curl -X POST "localhost:8080/message?s=2&r=1&t=text" -d "it's gonna be OK"
 
 # should return two messages
-curl -X GET "localhost:8080/message?s=1&r=2&c=5&o=0"
+echo "return two messages:"
+curl -X GET "localhost:8080/message?s=1&r=2"
+
+# should return one message (latest)
+echo "return one message:"
+curl -X GET "localhost:8080/message?s=1&r=2&c=1&o=0"

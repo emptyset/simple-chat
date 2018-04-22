@@ -147,22 +147,32 @@ func (h *Handler) getMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: optional parameters
-
-	count, err := strconv.Atoi(query.Get("c"))
-	if err != nil {
-		log.Errorf("error when converting count from request: %s", err)
-		status := http.StatusBadRequest
-		http.Error(w, http.StatusText(status), status)
-		return
+	var count int
+	rawCount := query.Get("c")
+	if rawCount == "" {
+		count = 100
+	} else {
+		count, err = strconv.Atoi(rawCount)
+		if err != nil {
+			log.Errorf("error when converting count from request: %s", err)
+			status := http.StatusBadRequest
+			http.Error(w, http.StatusText(status), status)
+			return
+		}
 	}
 
-	offset, err := strconv.Atoi(query.Get("o"))
-	if err != nil {
-		log.Errorf("error when converting offset from request: %s", err)
-		status := http.StatusBadRequest
-		http.Error(w, http.StatusText(status), status)
-		return
+	var offset int
+	rawOffset := query.Get("o")
+	if rawOffset == "" {
+		offset = 0
+	} else {
+		offset, err = strconv.Atoi(rawOffset)
+		if err != nil {
+			log.Errorf("error when converting offset from request: %s", err)
+			status := http.StatusBadRequest
+			http.Error(w, http.StatusText(status), status)
+			return
+		}
 	}
 
 	log.Debug("invoking model GetMessages")
