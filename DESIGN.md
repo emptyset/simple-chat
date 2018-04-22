@@ -11,6 +11,7 @@
 - sender_id
 - recipient_id
 - content
+- media_type
 - metadata
 
 ## Examples
@@ -27,8 +28,9 @@ message: {
 	sender_id: 1, 			// FK to user
 	recipient_id: 2,		// FK to user
 	content: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    media_type: "video",
 	// marshal'd metadata map[string][string]
-    metadata: "{ _type: \"video\", length: \"72h3m0.5s\", source: \"YouTube\" }" 
+    metadata: "{ length: \"72h3m0.5s\", source: \"YouTube\" }" 
 }
 ```
 
@@ -42,7 +44,7 @@ POST /user
 
 GET  /message?sid=1&rid=2&c=10&o=2
 POST /message
-  { sender_id: 1, recipient_id: 2, content: "...", metadata: "{ _type: \"video\", length: \"...\", ... }" }
+  { sender_id: 1, recipient_id: 2, content: "...", media_type: "video" }
 ```
 
 

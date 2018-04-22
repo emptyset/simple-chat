@@ -91,7 +91,7 @@ func (s *SqlDataStore) CreateMessage(senderId int, recipientId int, content stri
 
 func (s *SqlDataStore) ReadMessages(senderId int, recipientId int, count int, offset int) ([]Record, error) {
 	var records []Record
-	rows, err := s.database.Query("SELECT id, timestamp, content, media_type, metadata FROM messages WHERE sender_id = ? AND recipient_id = ? ORDER BY timestamp DESC LIMIT ? OFFSET ?", senderId, recipientId, count, offset)
+	rows, err := s.database.Query("SELECT id, timestamp, content, media_type, metadata FROM message WHERE sender_id <> recipient_id AND sender_id in (?, ?) AND recipient_id in (?, ?) ORDER BY timestamp DESC LIMIT ? OFFSET ?", senderId, recipientId, senderId, recipientId, count, offset)
 	if err != nil {
 		return records, err
 	}

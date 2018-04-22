@@ -1,11 +1,13 @@
 package app
 
 import (
+	"net/http"
 	"io/ioutil"
 	"encoding/json"
 	log "github.com/sirupsen/logrus"
-	"net/http"
 	"strconv"
+	"strings"
+
 	"github.com/emptyset/simple-chat/internal/models"
 )
 
@@ -30,11 +32,13 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(log.Fields{
 		"request": r.URL,
 	}).Debug("incoming request")
-	endpoint, ok := h.endpoints[r.URL.String()]
+	// TODO: should have used something like gorilla/mux
+	endpoint, ok := h.endpoints[strings.SplitN(r.URL.String(), "?", 2)[0]]
 	if ok {
 		endpoint(w, r)
 		return
 	} else {
+		log.Error("unable to match request with endpoint")
 		status := http.StatusBadRequest
 		http.Error(w, http.StatusText(status), status)
 	}
