@@ -3,14 +3,16 @@ package models
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/emptyset/simple-chat/internal/storage"
-	log "github.com/sirupsen/logrus"
-	"golang.org/x/crypto/bcrypt"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/emptyset/simple-chat/internal/storage"
+	log "github.com/sirupsen/logrus"
+	"golang.org/x/crypto/bcrypt"
 )
 
+// UnixTime struct exists to perform JSON marshal/unmarshal on unix timestamp from records
 type UnixTime struct {
 	time.Time
 }
@@ -31,15 +33,15 @@ func (t *UnixTime) MarshalJSON() ([]byte, error) {
 }
 
 type User struct {
-	Id       int    `json:"id"`
+	ID       int    `json:"id"`
 	Username string `json:"username"`
 }
 
 type Message struct {
-	Id          int         `json:"id"`
+	ID          int         `json:"id"`
 	Timestamp   UnixTime    `json:"timestamp"`
-	SenderId    int         `json:"sender_id"`
-	RecipientId int         `json:"recipient_id"`
+	SenderID    int         `json:"sender_id"`
+	RecipientID int         `json:"recipient_id"`
 	Content     string      `json:"content"`
 	MediaType   string      `json:"media_type"`
 	Metadata    interface{} `json:"metadata"`
@@ -54,8 +56,8 @@ const (
 
 type ChatModel interface {
 	SignupUser(username string, password string) (*User, error)
-	GetMessages(senderId int, recipientId int, count int, offset int) ([]Message, error)
-	SendMessage(senderId int, recipientId int, content string, mediaType string) error
+	GetMessages(senderID int, recipientID int, count int, offset int) ([]Message, error)
+	SendMessage(senderID int, recipientID int, content string, mediaType string) error
 }
 
 type Model struct {
@@ -95,11 +97,11 @@ func transcribeUser(record storage.Record) (*User, error) {
 	return user, err
 }
 
-func (m *Model) GetMessages(senderId int, recipientId int, count int, offset int) ([]Message, error) {
+func (m *Model) GetMessages(senderID int, recipientID int, count int, offset int) ([]Message, error) {
 	var messages []Message
 
 	log.Debug("reading messages from the data store")
-	records, err := m.store.ReadMessages(senderId, recipientId, count, offset)
+	records, err := m.store.ReadMessages(senderID, recipientID, count, offset)
 	if err != nil {
 		return messages, err
 	}
@@ -118,7 +120,7 @@ func (m *Model) GetMessages(senderId int, recipientId int, count int, offset int
 	return messages, nil
 }
 
-func (m *Model) SendMessage(senderId int, recipientId int, content string, mediaType string) error {
+func (m *Model) SendMessage(senderID int, recipientID int, content string, mediaType string) error {
 	log.Debug("getting metadata based on content and media type")
 	metadata, err := getMetadata(content, mediaType)
 	if err != nil {
@@ -126,7 +128,7 @@ func (m *Model) SendMessage(senderId int, recipientId int, content string, media
 	}
 
 	log.Debug("creating message in the data store")
-	_, err = m.store.CreateMessage(senderId, recipientId, content, mediaType, metadata)
+	_, err = m.store.CreateMessage(senderID, recipientID, content, mediaType, metadata)
 	return err
 }
 

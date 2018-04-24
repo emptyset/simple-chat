@@ -2,10 +2,11 @@ package main
 
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/emptyset/simple-chat/internal/app"
 	"github.com/emptyset/simple-chat/internal/models"
@@ -39,7 +40,7 @@ func main() {
 	}
 
 	log.Debug("creating sql data store")
-	store := storage.NewSqlDataStore(database)
+	store := storage.NewSQLDataStore(database)
 	model := models.New(store)
 	handler, err := app.NewHandler(model)
 	if err != nil {
