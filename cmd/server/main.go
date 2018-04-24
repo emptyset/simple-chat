@@ -2,9 +2,9 @@ package main
 
 import (
 	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
 	log "github.com/sirupsen/logrus"
 	"net/http"
-	_ "github.com/go-sql-driver/mysql"
 	"time"
 
 	"github.com/emptyset/simple-chat/internal/app"
@@ -47,7 +47,7 @@ func main() {
 	}
 
 	server := http.Server{
-		Addr: ":8080",
+		Addr:    ":8080",
 		Handler: handler,
 	}
 

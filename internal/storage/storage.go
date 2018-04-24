@@ -2,8 +2,8 @@ package storage
 
 import (
 	"database/sql"
-	"fmt"
 	"encoding/json"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
@@ -98,11 +98,11 @@ func (s *SqlDataStore) ReadMessages(senderId int, recipientId int, count int, of
 	defer rows.Close()
 
 	var (
-		id int
+		id           int
 		rawTimestamp []byte
-		content string
-		mediaType string
-		rawMetadata []byte
+		content      string
+		mediaType    string
+		rawMetadata  []byte
 	)
 
 	for rows.Next() {

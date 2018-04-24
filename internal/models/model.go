@@ -1,14 +1,14 @@
 package models
 
 import (
-	"golang.org/x/crypto/bcrypt"
-	"fmt"
 	"encoding/json"
+	"fmt"
+	"github.com/emptyset/simple-chat/internal/storage"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/crypto/bcrypt"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/emptyset/simple-chat/internal/storage"
 )
 
 type UnixTime struct {
@@ -31,23 +31,23 @@ func (t *UnixTime) MarshalJSON() ([]byte, error) {
 }
 
 type User struct {
-	Id int `json:"id"`
+	Id       int    `json:"id"`
 	Username string `json:"username"`
 }
 
 type Message struct {
-	Id int `json:"id"`
-	Timestamp UnixTime `json:"timestamp"`
-	SenderId int `json:"sender_id"`
-	RecipientId int `json:"recipient_id"`
-	Content string `json:"content"`
-	MediaType string `json:"media_type"`
-	Metadata interface{} `json:"metadata"`
+	Id          int         `json:"id"`
+	Timestamp   UnixTime    `json:"timestamp"`
+	SenderId    int         `json:"sender_id"`
+	RecipientId int         `json:"recipient_id"`
+	Content     string      `json:"content"`
+	MediaType   string      `json:"media_type"`
+	Metadata    interface{} `json:"metadata"`
 }
 
 // media types for metadata _type field
 const (
-	Text string = "text"
+	Text  string = "text"
 	Image string = "image"
 	Video string = "video"
 )

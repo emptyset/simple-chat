@@ -1,8 +1,8 @@
 package models_test
 
 import (
-	"github.com/stretchr/testify/assert"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
 
@@ -36,7 +36,7 @@ func TestGetMessages(t *testing.T) {
 	later := 1524365205
 	var first storage.Record = []byte(fmt.Sprintf(`{"id":1, "timestamp":%d, "sender_id": %d, "recipient_id": %d, "content": "hello", "media_type": "text", "metadata": {}}`, now, senderId, recipientId))
 	var second storage.Record = []byte(fmt.Sprintf(`{"id":2, "timestamp":%d, "sender_id": %d, "recipient_id": %d, "content": "hello", "media_type": "text", "metadata": {}}`, later, senderId, recipientId))
-	records := []storage.Record{ second, first }
+	records := []storage.Record{second, first}
 	store.On("ReadMessages", senderId, recipientId, count, offset).Return(records, nil)
 	model := models.New(store)
 

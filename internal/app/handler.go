@@ -1,10 +1,10 @@
 package app
 
 import (
-	"net/http"
-	"io/ioutil"
 	"encoding/json"
 	log "github.com/sirupsen/logrus"
+	"io/ioutil"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -12,13 +12,13 @@ import (
 )
 
 type Handler struct {
-	model models.ChatModel
+	model     models.ChatModel
 	endpoints map[string]func(http.ResponseWriter, *http.Request)
 }
 
 func NewHandler(model models.ChatModel) (*Handler, error) {
 	handler := &Handler{
-		model: model,
+		model:     model,
 		endpoints: make(map[string]func(http.ResponseWriter, *http.Request)),
 	}
 
