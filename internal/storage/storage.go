@@ -2,31 +2,32 @@ package storage
 
 import (
 	"database/sql"
-	"fmt"
 	"encoding/json"
-	log "github.com/sirupsen/logrus"
+	"fmt"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type Record []byte
 
 type DataStore interface {
 	CreateUser(username string, hash []byte) (Record, error)
-	CreateMessage(senderId int, recipientId int, content string, mediaType string, metadata map[string]string) (Record, error)
-	ReadMessages(senderId int, recipientId int, count int, offset int) ([]Record, error)
+	CreateMessage(senderID int, recipientID int, content string, mediaType string, metadata map[string]string) (Record, error)
+	ReadMessages(senderID int, recipientID int, count int, offset int) ([]Record, error)
 }
 
-type SqlDataStore struct {
+type SQLDataStore struct {
 	database *sql.DB
 }
 
-func NewSqlDataStore(database *sql.DB) *SqlDataStore {
-	return &SqlDataStore{
+func NewSQLDataStore(database *sql.DB) *SQLDataStore {
+	return &SQLDataStore{
 		database: database,
 	}
 }
 
-func (s *SqlDataStore) CreateUser(username string, hash []byte) (Record, error) {
+func (s *SQLDataStore) CreateUser(username string, hash []byte) (Record, error) {
 	record := []byte("")
 
 	log.Debug("preparing insert user statement")
@@ -55,7 +56,7 @@ func (s *SqlDataStore) CreateUser(username string, hash []byte) (Record, error) 
 	return record, nil
 }
 
-func (s *SqlDataStore) CreateMessage(senderId int, recipientId int, content string, mediaType string, metadata map[string]string) (Record, error) {
+func (s *SQLDataStore) CreateMessage(senderID int, recipientID int, content string, mediaType string, metadata map[string]string) (Record, error) {
 	record := []byte("")
 
 	log.Debug("preparing insert message statement")
@@ -70,7 +71,7 @@ func (s *SqlDataStore) CreateMessage(senderId int, recipientId int, content stri
 	}
 
 	log.Debug("executing statement")
-	response, err := statement.Exec(time.Now().UTC().Unix(), senderId, recipientId, content, mediaType, encodedMetadata)
+	response, err := statement.Exec(time.Now().UTC().Unix(), senderID, recipientID, content, mediaType, encodedMetadata)
 	if err != nil {
 		return record, err
 	}
@@ -89,20 +90,20 @@ func (s *SqlDataStore) CreateMessage(senderId int, recipientId int, content stri
 	return record, nil
 }
 
-func (s *SqlDataStore) ReadMessages(senderId int, recipientId int, count int, offset int) ([]Record, error) {
+func (s *SQLDataStore) ReadMessages(senderID int, recipientID int, count int, offset int) ([]Record, error) {
 	var records []Record
-	rows, err := s.database.Query("SELECT id, timestamp, content, media_type, metadata FROM message WHERE sender_id <> recipient_id AND sender_id in (?, ?) AND recipient_id in (?, ?) ORDER BY timestamp DESC LIMIT ? OFFSET ?", senderId, recipientId, senderId, recipientId, count, offset)
+	rows, err := s.database.Query("SELECT id, timestamp, content, media_type, metadata FROM message WHERE sender_id <> recipient_id AND sender_id in (?, ?) AND recipient_id in (?, ?) ORDER BY timestamp DESC LIMIT ? OFFSET ?", senderID, recipientID, senderID, recipientID, count, offset)
 	if err != nil {
 		return records, err
 	}
 	defer rows.Close()
 
 	var (
-		id int
+		id           int
 		rawTimestamp []byte
-		content string
-		mediaType string
-		rawMetadata []byte
+		content      string
+		mediaType    string
+		rawMetadata  []byte
 	)
 
 	for rows.Next() {
@@ -113,7 +114,7 @@ func (s *SqlDataStore) ReadMessages(senderId int, recipientId int, count int, of
 
 		// TODO: verify we are parsing timestamp and metadata correctly here
 
-		record := []byte(fmt.Sprintf(`{"id": %d, "timestamp": "%s", "sender_id": %d, "recipient_id": %d, "content": "%s", "media_type": "%s", "metadata": "%s"}`, id, rawTimestamp, senderId, recipientId, content, mediaType, rawMetadata))
+		record := []byte(fmt.Sprintf(`{"id": %d, "timestamp": "%s", "sender_id": %d, "recipient_id": %d, "content": "%s", "media_type": "%s", "metadata": "%s"}`, id, rawTimestamp, senderID, recipientID, content, mediaType, rawMetadata))
 
 		log.WithFields(log.Fields{
 			"record": string(record),

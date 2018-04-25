@@ -1,24 +1,27 @@
 package app
 
 import (
-	"net/http"
-	"io/ioutil"
 	"encoding/json"
-	log "github.com/sirupsen/logrus"
+	"io/ioutil"
+	"net/http"
 	"strconv"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/emptyset/simple-chat/internal/models"
 )
 
+// Handler routes the endpoints to specific handlers
 type Handler struct {
-	model models.ChatModel
+	model     models.ChatModel
 	endpoints map[string]func(http.ResponseWriter, *http.Request)
 }
 
+// NewHandler returns a Handler type based on the ChatModel
 func NewHandler(model models.ChatModel) (*Handler, error) {
 	handler := &Handler{
-		model: model,
+		model:     model,
 		endpoints: make(map[string]func(http.ResponseWriter, *http.Request)),
 	}
 
@@ -36,7 +39,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	endpoint, ok := h.endpoints[strings.SplitN(r.URL.String(), "?", 2)[0]]
 	if ok {
 		endpoint(w, r)
-		return
 	} else {
 		log.Error("unable to match request with endpoint")
 		status := http.StatusBadRequest
@@ -90,7 +92,7 @@ func (h *Handler) messageEndpoint(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) createMessage(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 
-	senderId, err := strconv.Atoi(query.Get("s"))
+	senderID, err := strconv.Atoi(query.Get("s"))
 	if err != nil {
 		log.Errorf("error when converting sender id from request: %s", err)
 		status := http.StatusBadRequest
@@ -98,7 +100,7 @@ func (h *Handler) createMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	recipientId, err := strconv.Atoi(query.Get("r"))
+	recipientID, err := strconv.Atoi(query.Get("r"))
 	if err != nil {
 		log.Errorf("error when converting recipient id from request: %s", err)
 		status := http.StatusBadRequest
@@ -117,7 +119,7 @@ func (h *Handler) createMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Debug("invoking model SendMessage")
-	err = h.model.SendMessage(senderId, recipientId, string(content), mediaType)
+	err = h.model.SendMessage(senderID, recipientID, string(content), mediaType)
 	if err != nil {
 		log.Errorf("error when sending message: %s", err)
 		status := http.StatusInternalServerError
@@ -131,7 +133,7 @@ func (h *Handler) createMessage(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) getMessages(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 
-	senderId, err := strconv.Atoi(query.Get("s"))
+	senderID, err := strconv.Atoi(query.Get("s"))
 	if err != nil {
 		log.Errorf("error when converting sender id from request: %s", err)
 		status := http.StatusBadRequest
@@ -139,7 +141,7 @@ func (h *Handler) getMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	recipientId, err := strconv.Atoi(query.Get("r"))
+	recipientID, err := strconv.Atoi(query.Get("r"))
 	if err != nil {
 		log.Errorf("error when converting recipient id from request: %s", err)
 		status := http.StatusBadRequest
@@ -176,7 +178,7 @@ func (h *Handler) getMessages(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Debug("invoking model GetMessages")
-	messages, err := h.model.GetMessages(senderId, recipientId, count, offset)
+	messages, err := h.model.GetMessages(senderID, recipientID, count, offset)
 	if err != nil {
 		log.Errorf("error when getting messages: %s", err)
 		status := http.StatusInternalServerError

@@ -5,7 +5,7 @@ $ docker-compose up -d
 
 # running unit tests
 ```bash
-$ docker-compose run --rm app go test -v ./...
+$ go test -v ./...
 ```
 
 # running smoke test
