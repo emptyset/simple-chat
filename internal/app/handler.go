@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
-	"strings"
 
 	log "github.com/sirupsen/logrus"
 
@@ -14,39 +13,20 @@ import (
 
 // Handler routes the endpoints to specific handlers
 type Handler struct {
-	model     models.ChatModel
-	endpoints map[string]func(http.ResponseWriter, *http.Request)
+	model models.ChatModel
 }
 
 // NewHandler returns a Handler type based on the ChatModel
 func NewHandler(model models.ChatModel) (*Handler, error) {
 	handler := &Handler{
-		model:     model,
-		endpoints: make(map[string]func(http.ResponseWriter, *http.Request)),
+		model: model,
 	}
-
-	handler.endpoints["/user"] = handler.userEndpoint
-	handler.endpoints["/message"] = handler.messageEndpoint
 
 	return handler, nil
 }
 
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.WithFields(log.Fields{
-		"request": r.URL,
-	}).Debug("incoming request")
-	// TODO: should have used something like gorilla/mux
-	endpoint, ok := h.endpoints[strings.SplitN(r.URL.String(), "?", 2)[0]]
-	if ok {
-		endpoint(w, r)
-	} else {
-		log.Error("unable to match request with endpoint")
-		status := http.StatusBadRequest
-		http.Error(w, http.StatusText(status), status)
-	}
-}
-
-func (h *Handler) userEndpoint(w http.ResponseWriter, r *http.Request) {
+/*
+func (h *Handler) UserEndpoint(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		log.Debug("invoking createUser handler")
@@ -56,8 +36,9 @@ func (h *Handler) userEndpoint(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(status), status)
 	}
 }
+*/
 
-func (h *Handler) createUser(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	username := r.Header.Get("Username")
 	password := r.Header.Get("Password")
 
@@ -75,7 +56,8 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-func (h *Handler) messageEndpoint(w http.ResponseWriter, r *http.Request) {
+/*
+func (h *Handler) MessageEndpoint(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		log.Debug("invoking createMessage handler")
@@ -88,8 +70,9 @@ func (h *Handler) messageEndpoint(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(status), status)
 	}
 }
+*/
 
-func (h *Handler) createMessage(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 
 	senderID, err := strconv.Atoi(query.Get("s"))
@@ -130,7 +113,7 @@ func (h *Handler) createMessage(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (h *Handler) getMessages(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) ReadMessages(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 
 	senderID, err := strconv.Atoi(query.Get("s"))

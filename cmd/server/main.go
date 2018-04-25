@@ -6,6 +6,7 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/emptyset/simple-chat/internal/app"
@@ -42,14 +43,20 @@ func main() {
 	log.Debug("creating sql data store")
 	store := storage.NewSQLDataStore(database)
 	model := models.New(store)
+
 	handler, err := app.NewHandler(model)
 	if err != nil {
 		log.Fatalf("unable to instantiate handler: %s", err)
 	}
 
+	router := mux.NewRouter()
+	router.HandleFunc("/user", handler.CreateUser).Methods("POST")
+	router.HandleFunc("/message", handler.CreateMessage).Methods("POST")
+	router.HandleFunc("/message", handler.ReadMessages).Methods("GET")
+
 	server := http.Server{
 		Addr:    ":8080",
-		Handler: handler,
+		Handler: router,
 	}
 
 	log.Debug("starting server")
