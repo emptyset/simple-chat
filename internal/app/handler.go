@@ -25,19 +25,6 @@ func NewHandler(model models.ChatModel) (*Handler, error) {
 	return handler, nil
 }
 
-/*
-func (h *Handler) UserEndpoint(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case "POST":
-		log.Debug("invoking createUser handler")
-		h.createUser(w, r)
-	default:
-		status := http.StatusMethodNotAllowed
-		http.Error(w, http.StatusText(status), status)
-	}
-}
-*/
-
 func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	username := r.Header.Get("Username")
 	password := r.Header.Get("Password")
@@ -55,22 +42,6 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
 }
-
-/*
-func (h *Handler) MessageEndpoint(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case "POST":
-		log.Debug("invoking createMessage handler")
-		h.createMessage(w, r)
-	case "GET":
-		log.Debug("invoking getMessages handler")
-		h.getMessages(w, r)
-	default:
-		status := http.StatusMethodNotAllowed
-		http.Error(w, http.StatusText(status), status)
-	}
-}
-*/
 
 func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
