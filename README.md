@@ -1,5 +1,6 @@
 # running the server (local)
 ```bash
+$ docker-compose build
 $ docker-compose up -d
 ```
 
@@ -10,6 +11,7 @@ $ go test -v ./...
 
 # running smoke test
 ```bash
+$ docker-compose build
 $ docker-compose up -d
 $ ./test/smoke.sh
 ```
